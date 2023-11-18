@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import FirebaseAuthService from './config/firebaseAuthService';
+import LoginForm from './components/LoginForm';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [recording, setRecording] = useState(false);
   const [audioStream, setAudioStream] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [transcription, setTranscription] = useState('');
 
+
+  FirebaseAuthService.subscribetoAuthChanges(setUser);
+  
   async function sendAudioForTranscription(audioBlob) {
     try {
-      const apiKey = "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"; // Replace with your OpenAI API key
+      const apiKey = "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"; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/audio/transcriptions';
 
       const formData = new FormData();
@@ -92,21 +98,24 @@ function App() {
 
   return (
     <div className="container">
-      <h2>Aplicación de dictado</h2>
-      <button
-        type="button"
-        className="btn btn-primary mb-1 mt-2"
-        onClick={toggleRecording}
-      >
-        {recording ? 'Stop Recording' : 'Start Recording'}
-      </button>
-      <div>
-      </div>
+      
+      <LoginForm existingUser={user}></LoginForm>
+      
+      { user ?
+            <><button
+          type="button"
+          className="btn btn-primary mb-1 mt-2"
+          onClick={toggleRecording}
+        >
+          {recording ? 'Comenzar a grabar' : 'Dejar de grabar'}
+        </button><div className="input-group">
+            <span className="input-group-text">Contenido</span>
+            <textarea className="form-control" id="textarea1" value={transcription}></textarea>
+            <button className='btn btn-success'>Subir mensaje a Base de datos</button>
+          </div></>
 
-      <div className="input-group">
-        <span className="input-group-text">Contenido</span>
-        <textarea className="form-control" id="textarea1" value={transcription}></textarea>
-      </div>
+      : null}
+
     </div>
   );
 }
